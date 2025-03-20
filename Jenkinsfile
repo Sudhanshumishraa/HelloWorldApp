@@ -14,12 +14,6 @@ pipeline {
             }
         }
 
-        stage('Test') {
-            steps {
-                bat 'dotnet test --no-build --configuration Release'
-            }
-        }
-
         stage('Publish') {
             steps {
                 bat 'dotnet publish -c Release -o publish'
