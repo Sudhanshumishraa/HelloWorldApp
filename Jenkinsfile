@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                git 'https://github.com/Sudhanshumishraa/HelloWorldApp.git'
+                checkout scm
             }
         }
 
