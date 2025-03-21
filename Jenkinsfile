@@ -46,7 +46,7 @@ pipeline {
         stage('Deploy to Windows Server') {
             steps {
                 bat """
-                    "${PSCP_PATH}" -batch -r -pw -p 58373 "${DEPLOY_PASS}" "${BUILD_PATH}\\*" ${DEPLOY_USER}@${DEPLOY_SERVER}:${DEPLOY_PATH}
+                   "${PSCP_PATH}" -batch -r -hostkey ssh-ed25519 255 SHA256:zKIYsnxgHHnZHqljrBvDo4gQ/PowdMkpWWqMBySXEtk -pw -p 58373 "${DEPLOY_PASS}" "${BUILD_PATH}\\*" ${DEPLOY_USER}@${DEPLOY_SERVER}:${DEPLOY_PATH}
                 """
             }
         }
