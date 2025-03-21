@@ -22,13 +22,13 @@ pipeline {
  
         stage('Build') {
             steps {
-                powershell 'dotnet build HelloWorldApp.csproj --configuration Release'
+                bat 'dotnet build HelloWorldApp.csproj --configuration Release'
             }
         }
  
         stage('Publish') {
             steps {
-                powershell 'dotnet publish HelloWorldApp.csproj -c Release -o ${BUILD_PATH}'
+                bat 'dotnet publish HelloWorldApp.csproj -c Release -o ${BUILD_PATH}'
             }
         }
  
@@ -46,7 +46,7 @@ pipeline {
         stage('Deploy to Windows Server') {
             steps {
                 script {
-                    powershell """
+                    bat """
 & '${PSCP_PATH}' -batch -r -pw '${DEPLOY_PASS}' '${BUILD_PATH}\\*' '${DEPLOY_USER}@${DEPLOY_SERVER}:${DEPLOY_PATH}'
                     """
                 }
