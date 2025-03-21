@@ -41,12 +41,13 @@ pipeline {
             }
         }
  
-        stage('Deploy to Windows Server') {
+       stage('Deploy to Windows Server') {
             steps {
                 script {
-                    bat """
-                        pscp -pw "${DEPLOY_PASS}" -r "${BUILD_PATH}\\*" "${DEPLOY_USER}@${DEPLOY_SERVER}:${DEPLOY_PATH}"
-                    """
+                    sh '''
+                        export SSHPASS="$DEPLOY_PASS"
+                        sshpass -e scp -o StrictHostKeyChecking=no -r "$BUILD_PATH/." "$DEPLOY_USER@$DEPLOY_SERVER:$DEPLOY_PATH"
+                    '''
                 }
             }
         }
