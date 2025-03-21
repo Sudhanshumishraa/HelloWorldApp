@@ -5,7 +5,7 @@ pipeline {
         BUILD_PATH = "${WORKSPACE}\\publish"
         DEPLOY_SERVER = "103.38.50.157"
         DEPLOY_USER = "CylSrv9Mgr"
-        DEPLOY_PASS = "Dwu$CakLy@515W" // Escaping $ not needed here in Jenkins env block
+        DEPLOY_PASS = "Dwu$CakLy@515W"
         DEPLOY_PATH = "D:/CI_CD/test_Dotnet_2/"
     }
 
@@ -32,10 +32,24 @@ pipeline {
             steps {
                 bat '''
                     IF EXIST "%WORKSPACE%\\publish" (
-                        echo Directory exists
+                        echo ✅ Publish directory exists.
                     ) ELSE (
-                        echo Directory does not exist
+                        echo ❌ Publish directory does not exist.
                         exit /b 1
+                    )
+                '''
+            }
+        }
+
+        stage('Check sshpass in PATH') {
+            steps {
+                bat '''
+                    where sshpass >nul 2>nul
+                    IF %ERRORLEVEL% NEQ 0 (
+                        echo ❌ ERROR: sshpass.exe not found in PATH.
+                        exit /b 1
+                    ) ELSE (
+                        echo ✅ sshpass.exe found in PATH.
                     )
                 '''
             }
