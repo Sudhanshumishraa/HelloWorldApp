@@ -2,17 +2,14 @@ pipeline {
     agent any
 
     environment {
-        BUILD_PATH = "${WORKSPACE}\\publish"
-        DEPLOY_SERVER = "103.38.50.157"
-        DEPLOY_USER = "CylSrv9Mgr"
-        DEPLOY_PASS = "Dwu$CakLy@515W"
-        DEPLOY_PATH = "D:/CI_CD/test_Dotnet_2/"
+        DOTNET_ROOT = "C:\\Program Files\\dotnet"
+        PATH = "${env.PATH};${DOTNET_ROOT};C:\\path\\to\\putty"  // Add pscp.exe directory
     }
 
     stages {
         stage('Checkout Code') {
             steps {
-                git branch: 'main', credentialsId: '8ad3972c-76d4-4a6f-aa27-af093a06ddbc', url: 'https://github.com/Sudhanshumishraa/HelloWorldApp.git'
+                git credentialsId: '8ad3972c-76d4-4a6f-aa27-af093a06ddbc', url: 'https://github.com/Sudhanshumishraa/HelloWorldApp.git', branch: 'main'
             }
         }
 
@@ -31,7 +28,7 @@ pipeline {
         stage('Verify Build Output') {
             steps {
                 bat '''
-                    IF EXIST "%WORKSPACE%\\publish" (
+                    IF EXIST "publish" (
                         echo Directory exists
                     ) ELSE (
                         echo Directory does not exist
@@ -44,20 +41,22 @@ pipeline {
         stage('Deploy to Windows Server') {
             steps {
                 script {
-                    bat """
-                        pscp -pw "${DEPLOY_PASS}" -r "${BUILD_PATH}\\*" "${DEPLOY_USER}@${DEPLOY_SERVER}:${DEPLOY_PATH}"
-                    """
+                    def remoteUser = 'CylSrv9Mgr'
+                    def remotePass = 'Dwunull@515W'
+                    def remoteHost = '103.38.50.157'
+                    def remotePath = 'D:/CI_CD/test_Dotnet_2/'
+                    bat """pscp -pw "${remotePass}" -r publish/* ${remoteUser}@${remoteHost}:${remotePath}"""
                 }
             }
         }
     }
 
     post {
-        success {
-            echo '✅ Deployment Successful!'
-        }
         failure {
             echo '❌ Deployment Failed!'
+        }
+        success {
+            echo '✅ Deployment Succeeded!'
         }
     }
 }
