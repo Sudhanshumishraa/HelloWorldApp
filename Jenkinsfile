@@ -25,7 +25,7 @@ pipeline {
  
 	stage('Publish') {
     steps {
-        bat 'dotnet publish HelloWorld.csproj -c Release -o /var/jenkins_home/jobs/Dotnet/workspace/publish'
+        bat 'dotnet publish HelloWorldApp.csproj -c Release -o /var/jenkins_home/jobs/Dotnet/workspace/publish'
     	}
 	}
  
