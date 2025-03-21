@@ -39,18 +39,18 @@ stage('Verify Build Output') {
                 '''
             }
         }
- 
-       stage('Deploy to Windows Server') {
-            steps {
-                script {
-                    bat '''
-                        export SSHPASS="$DEPLOY_PASS"
-                        sshpass -e scp -o StrictHostKeyChecking=no -r "$BUILD_PATH/." "$DEPLOY_USER@$DEPLOY_SERVER:$DEPLOY_PATH"
-                    '''
-                }
-            }
+        
+ stage('Deploy to Windows Server') {
+    steps {
+        script {
+            bat '''
+                set SSHPASS=%DEPLOY_PASS%
+                sshpass -e scp -o StrictHostKeyChecking=no -r "%BUILD_PATH%\\." "%DEPLOY_USER%@%DEPLOY_SERVER%:%DEPLOY_PATH%"
+            '''
         }
     }
+}
+
  
     post {
         success {
