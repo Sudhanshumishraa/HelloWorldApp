@@ -27,7 +27,29 @@ pipeline {
                 bat 'dotnet publish HelloWorldApp.csproj -c Release -o publish'
             }
         }
- 
+stage('Verify Build Output') {
+            steps {
+                bat '''
+                    IF EXIST "%WORKSPACE%\\publish" (
+                        echo Directory exists
+                    ) ELSE (
+                        echo Directory does not exist
+                        exit /b 1
+                    )
+                '''
+            }
+        }
+        
+           stage('Install SSHPass (if missing)') {
+            steps {
+                script {
+                    def sshpassExists = sh(script: "command -v sshpass", returnStatus: true) == 0
+                    if (!sshpassExists) {
+                        sh 'sudo apt update && sudo apt install -y sshpass'
+                    }
+                }
+            }
+        }
  
        stage('Deploy to Windows Server') {
             steps {
