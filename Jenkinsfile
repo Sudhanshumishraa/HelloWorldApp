@@ -1,16 +1,16 @@
 pipeline {
     agent any
- 
+
     environment {
         NODE_VERSION = '20'
         BUILD_PATH = "${WORKSPACE}\\publish"
         DEPLOY_SERVER = "103.38.50.157"
         DEPLOY_USER = "CylSrv9Mgr"
-        DEPLOY_PASS = "Dwu\$CakLy@515W"
+        DEPLOY_PASS = "Dwu$CakLy@515W"  // No escape needed in double quotes
         DEPLOY_PATH = "D:/CI_CD/test_Dotnet_2/"
-        PSCP_PATH = "C:\\Program Files\\PuTTY\\pscp.exe" // Path to PSCP (PuTTY SCP)
+        PSCP_PATH = "C:\\Program Files\\PuTTY\\pscp.exe"
     }
- 
+
     stages {
         stage('Checkout Code') {
             steps {
@@ -19,19 +19,19 @@ pipeline {
                     url: 'https://github.com/Sudhanshumishraa/HelloWorldApp.git'
             }
         }
- 
+
         stage('Build') {
             steps {
                 bat 'dotnet build HelloWorldApp.csproj --configuration Release'
             }
         }
- 
+
         stage('Publish') {
             steps {
-                bat 'dotnet publish HelloWorldApp.csproj -c Release -o ${BUILD_PATH}'
+                bat "dotnet publish HelloWorldApp.csproj -c Release -o ${BUILD_PATH}"
             }
         }
- 
+
         stage('Verify Build Output') {  
             steps {
                 script {
@@ -42,18 +42,16 @@ pipeline {
                 }
             }
         }
- 
+
         stage('Deploy to Windows Server') {
             steps {
-                script {
-                    bat """
-& '${PSCP_PATH}' -batch -r -pw '${DEPLOY_PASS}' '${BUILD_PATH}\\*' '${DEPLOY_USER}@${DEPLOY_SERVER}:${DEPLOY_PATH}'
-                    """
-                }
+                bat """
+                    "${PSCP_PATH}" -batch -r -pw "${DEPLOY_PASS}" "${BUILD_PATH}\\*" ${DEPLOY_USER}@${DEPLOY_SERVER}:${DEPLOY_PATH}
+                """
             }
         }
     }
- 
+
     post {
         success {
             echo '✅ Deployment Successful!'
