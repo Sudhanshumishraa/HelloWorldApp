@@ -6,7 +6,7 @@ pipeline {
         BUILD_PATH = "${WORKSPACE}/publish"
         DEPLOY_SERVER = "103.38.50.157"
         DEPLOY_USER = "CylSrv9Mgr"
-		DEPLOY_PASS = "Dwu\$CakLy@515W"
+        DEPLOY_PASS = "Dwu\$CakLy@515W"
         DEPLOY_PATH = "D:/CI_CD/test_Dotnet_2/"  // ✅ Fixed Windows path
     }
  
@@ -19,13 +19,13 @@ pipeline {
  
        stage('Build') {
     steps {
-        sh 'dotnet build HelloWorldApp.csproj --configuration Release'
+        bat 'dotnet build HelloWorldApp.csproj --configuration Release'
     	}
 	}
  
 	stage('Publish') {
     steps {
-        sh 'dotnet publish HelloWorld.csproj -c Release -o /var/jenkins_home/jobs/Dotnet/workspace/publish'
+        bat 'dotnet publish HelloWorld.csproj -c Release -o /var/jenkins_home/jobs/Dotnet/workspace/publish'
     	}
 	}
  
@@ -33,7 +33,7 @@ pipeline {
         stage('Verify Build Output') { // ✅ Check if build directory exists
             steps {
                 script {
-                    def buildExists = sh(script: "test -d ${BUILD_PATH} && echo 'exists'", returnStdout: true).trim()
+                    def buildExists = bat(script: "test -d ${BUILD_PATH} && echo 'exists'", returnStdout: true).trim()
                     if (buildExists != "exists") {
                         error "❌ Build directory does not exist! Aborting deployment."
                     }
@@ -46,7 +46,7 @@ pipeline {
                 script {
                     def sshpassExists = sh(script: "command -v sshpass", returnStatus: true) == 0
                     if (!sshpassExists) {
-                        sh 'sudo apt update && sudo apt install -y sshpass'
+                        bat 'sudo apt update && sudo apt install -y sshpass'
                     }
                 }
             }
@@ -55,7 +55,7 @@ pipeline {
         stage('Deploy to Windows Server') {
             steps {
                 script {
-                    sh '''
+                    bat '''
                         export SSHPASS="$DEPLOY_PASS"
                         sshpass -e scp -o StrictHostKeyChecking=no -r "$BUILD_PATH/." "$DEPLOY_USER@$DEPLOY_SERVER:$DEPLOY_PATH"
                     '''
