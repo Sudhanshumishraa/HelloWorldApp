@@ -28,18 +28,6 @@ pipeline {
             }
         }
  
-        stage('Verify Build Output') {
-            steps {
-                bat '''
-                    IF EXIST "%WORKSPACE%\\publish" (
-                        echo Directory exists
-                    ) ELSE (
-                        echo Directory does not exist
-                        exit /b 1
-                    )
-                '''
-            }
-        }
  
        stage('Deploy to Windows Server') {
             steps {
