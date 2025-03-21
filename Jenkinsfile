@@ -1,80 +1,59 @@
 pipeline {
     agent any
-
+ 
     environment {
+        NODE_VERSION = '20'
         BUILD_PATH = "${WORKSPACE}\\publish"
         DEPLOY_SERVER = "103.38.50.157"
         DEPLOY_USER = "CylSrv9Mgr"
-        DEPLOY_PASS = "Dwu$CakLy@515W"
+        DEPLOY_PASS = "Dwu\$CakLy@515W"
         DEPLOY_PATH = "D:/CI_CD/test_Dotnet_2/"
+        PSCP_PATH = "C:\\Program Files\\PuTTY\\pscp.exe" // Path to PSCP (PuTTY SCP)
     }
-
+ 
     stages {
         stage('Checkout Code') {
             steps {
-                git branch: 'main', credentialsId: '8ad3972c-76d4-4a6f-aa27-af093a06ddbc', url: 'https://github.com/Sudhanshumishraa/HelloWorldApp.git'
+                git branch: 'main', 
+                    credentialsId: '8ad3972c-76d4-4a6f-aa27-af093a06ddbc', 
+                    url: 'https://github.com/Sudhanshumishraa/HelloWorldApp.git'
             }
         }
-
+ 
         stage('Build') {
             steps {
-                bat 'dotnet build HelloWorldApp.csproj --configuration Release'
+                powershell 'dotnet build HelloWorldApp.csproj --configuration Release'
             }
         }
-
+ 
         stage('Publish') {
             steps {
-                bat 'dotnet publish HelloWorldApp.csproj -c Release -o publish'
+                powershell 'dotnet publish HelloWorldApp.csproj -c Release -o ${BUILD_PATH}'
             }
         }
-
-        stage('Verify Build Output') {
+ 
+        stage('Verify Build Output') {  
             steps {
-                bat '''
-                    IF EXIST "%WORKSPACE%\\publish" (
-                        echo ✅ Publish directory exists.
-                    ) ELSE (
-                        echo ❌ Publish directory does not exist.
-                        exit /b 1
-                    )
-                '''
+                script {
+                    def buildExists = fileExists("${BUILD_PATH}")
+                    if (!buildExists) {
+                        error "❌ Build directory does not exist! Aborting deployment."
+                    }
+                }
             }
         }
-
-        stage('Check sshpass in PATH') {
-            steps {
-                bat '''
-                    where sshpass >nul 2>nul
-                    IF ERRORLEVEL 1 (
-                        echo ❌ ERROR: sshpass.exe not found in PATH.
-                        exit /b 1
-                    ) ELSE (
-                        echo ✅ sshpass.exe found in PATH.
-                    )
-                '''
-            }
-        }
-
+ 
         stage('Deploy to Windows Server') {
             steps {
-                bat '''
-                    echo Setting SSHPASS environment variable...
-                    set SSHPASS=%DEPLOY_PASS%
-                    echo ✅ SSHPASS set.
-
-                    echo Starting deployment via sshpass and scp...
-                    sshpass -e scp -o StrictHostKeyChecking=no -r "%BUILD_PATH%\\*" %DEPLOY_USER%@%DEPLOY_SERVER%:%DEPLOY_PATH%
-                    IF ERRORLEVEL 1 (
-                        echo ❌ Deployment failed during SCP.
-                        exit /b 1
-                    ) ELSE (
-                        echo ✅ Deployment completed successfully.
-                    )
-                '''
+                script {
+                    powershell """
+& '${PSCP_PATH}' -batch -r -pw '${DEPLOY_PASS}' '${BUILD_PATH}\\*' '${DEPLOY_USER}@${DEPLOY_SERVER}:${DEPLOY_PATH}'
+                    """
+                }
             }
         }
     }
-
+ 
     post {
         success {
             echo '✅ Deployment Successful!'
