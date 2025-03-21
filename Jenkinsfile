@@ -39,22 +39,11 @@ stage('Verify Build Output') {
                 '''
             }
         }
-        
-           stage('Install SSHPass (if missing)') {
-            steps {
-                script {
-                    def sshpassExists = sh(script: "command -v sshpass", returnStatus: true) == 0
-                    if (!sshpassExists) {
-                        sh 'sudo apt update && sudo apt install -y sshpass'
-                    }
-                }
-            }
-        }
  
        stage('Deploy to Windows Server') {
             steps {
                 script {
-                    sh '''
+                    bat '''
                         export SSHPASS="$DEPLOY_PASS"
                         sshpass -e scp -o StrictHostKeyChecking=no -r "$BUILD_PATH/." "$DEPLOY_USER@$DEPLOY_SERVER:$DEPLOY_PATH"
                     '''
