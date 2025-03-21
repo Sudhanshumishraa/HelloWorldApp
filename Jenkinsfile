@@ -45,7 +45,7 @@ pipeline {
             steps {
                 bat '''
                     where sshpass >nul 2>nul
-                    IF %ERRORLEVEL% NEQ 0 (
+                    IF ERRORLEVEL 1 (
                         echo ❌ ERROR: sshpass.exe not found in PATH.
                         exit /b 1
                     ) ELSE (
@@ -57,12 +57,20 @@ pipeline {
 
         stage('Deploy to Windows Server') {
             steps {
-                script {
-                    bat '''
-                        set SSHPASS=%DEPLOY_PASS%
-                        sshpass -e scp -o StrictHostKeyChecking=no -r "%BUILD_PATH%\\*" "%DEPLOY_USER%@%DEPLOY_SERVER%:%DEPLOY_PATH%"
-                    '''
-                }
+                bat '''
+                    echo Setting SSHPASS environment variable...
+                    set SSHPASS=%DEPLOY_PASS%
+                    echo ✅ SSHPASS set.
+
+                    echo Starting deployment via sshpass and scp...
+                    sshpass -e scp -o StrictHostKeyChecking=no -r "%BUILD_PATH%\\*" %DEPLOY_USER%@%DEPLOY_SERVER%:%DEPLOY_PATH%
+                    IF ERRORLEVEL 1 (
+                        echo ❌ Deployment failed during SCP.
+                        exit /b 1
+                    ) ELSE (
+                        echo ✅ Deployment completed successfully.
+                    )
+                '''
             }
         }
     }
