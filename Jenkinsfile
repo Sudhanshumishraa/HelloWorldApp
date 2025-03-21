@@ -1,7 +1,7 @@
 pipeline {
     agent any
 
-    environment {
+      environment {
         NODE_VERSION = '20'
         BUILD_PATH = "${WORKSPACE}\\publish"
         DEPLOY_SERVER = "103.38.50.157"
@@ -11,7 +11,7 @@ pipeline {
         PSCP_PATH = "C:\\Program Files\\PuTTY\\pscp.exe"
     }
 
-    stages {
+     stages {
         stage('Checkout Code') {
             steps {
                 git branch: 'main', 
@@ -20,7 +20,7 @@ pipeline {
             }
         }
 
-        stage('Build') {
+       stage('Build') {
             steps {
                 bat 'dotnet build HelloWorldApp.csproj --configuration Release'
             }
@@ -32,32 +32,32 @@ pipeline {
             }
         }
 
-        stage('Verify Build Output') {  
+        stage('Deploy') {
             steps {
                 script {
-                    def buildExists = fileExists("${BUILD_PATH}")
-                    if (!buildExists) {
-                        error "❌ Build directory does not exist! Aborting deployment."
-                    }
-                }
-            }
-        }
+                    withCredentials([usernamePassword(credentialsId: 'coreuser', passwordVariable: 'CREDENTIAL_PASSWORD', usernameVariable: 'CREDENTIAL_USERNAME')]) {
+                    powershell '''
+                    
+                    $credentials = New-Object System.Management.Automation.PSCredential($env:CREDENTIAL_USERNAME, (ConvertTo-SecureString $env:CREDENTIAL_PASSWORD -AsPlainText -Force))
 
-        stage('Deploy to Windows Server') {
-            steps {
-                bat """
-                    "${PSCP_PATH}" -batch -r -pw "${DEPLOY_PASS}" "${BUILD_PATH}\\*" ${DEPLOY_USER}@${DEPLOY_SERVER}:${DEPLOY_PATH}
-                """
+                    
+                    New-PSDrive -Name X -PSProvider FileSystem -Root "\\\\LAPTOP-DFRQ3ILG\\coreapp" -Persist -Credential $credentials
+
+                    
+                    Copy-Item -Path '.\\publish\\*' -Destination 'X:\' -Force
+
+                    
+                    Remove-PSDrive -Name X
+                    '''
+                }
+                }
             }
         }
     }
 
     post {
         success {
-            echo '✅ Deployment Successful!'
-        }
-        failure {
-            echo '❌ Deployment Failed!'
+            echo 'Build, test, and publish successful!'
         }
     }
 }
