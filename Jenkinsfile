@@ -6,7 +6,7 @@ pipeline {
         BUILD_PATH = "${WORKSPACE}\\publish"
         DEPLOY_SERVER = "103.38.50.157"
         DEPLOY_USER = "CylSrv9Mgr"
-        DEPLOY_PASS = "Dwu$CakLy@515W"  // No escape needed in double quotes
+        DEPLOY_PASS = "Dwu\$CakLy@515W"  // No escape needed in double quotes
         DEPLOY_PATH = "D:/CI_CD/test_Dotnet_2/"
         PSCP_PATH = "C:\\Program Files\\PuTTY\\pscp.exe"
     }
